@@ -1,5 +1,3 @@
-# 超网络度两种定义方式的相关性
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,12 +28,10 @@ def getAdjs(df_hyper_matrix, N):
 
 
 def getDegDistribution(deg_list):
-    print(deg_list)
     deg_max = max(deg_list)
     deg_dict = {}
     for i in range(0, int(deg_max) + 1):
         deg_dict[i] = 0
-    print(deg_dict)
     for deg in range(0, int(deg_max) + 1):
         total = len(list(np.where(np.array(deg_list) == deg)[0]))
         deg_dict[deg] = deg_dict[deg] + total

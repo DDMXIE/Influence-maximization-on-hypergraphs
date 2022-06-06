@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from datamanage import DataManage
 
+
 class Transform:
 
     def changeEdgeToMatrix(self, path):

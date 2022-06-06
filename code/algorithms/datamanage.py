@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
 
+
 class DataManage:
+
     def generateMap(self, path):
         node_dict = {}
         df = pd.read_csv(path, index_col=False, header = None)

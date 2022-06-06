@@ -1,13 +1,8 @@
 # matplotlib.use('Agg')
 # plt.switch_backend('agg')
 from collections import Counter
-from decimal import Decimal
-
 import pandas as pd
-import scipy
 from pylab import *
-from scipy import stats
-
 from Hyperspreading import Hyperspreading
 from transform import Transform
 
@@ -34,7 +29,6 @@ def each_pair_nodes_influence_overlap(N, node_influence_dict):
                 overlap = len(inters)
                 matrix[from_node][to_node] = overlap
     df_matrix = pd.DataFrame(matrix)
-    print(df_matrix)
     return df_matrix
 
 
@@ -51,7 +45,6 @@ def get_distribution_from_arr(arr):
 
 
 def overlap_with_nodes_neighbors(df_hyper_matrix, N, overlap_df):
-    print(np.dot(df_hyper_matrix, df_hyper_matrix.T))
     overlap_matrix = overlap_df.values
     matrix = np.dot(df_hyper_matrix, df_hyper_matrix.T)
     overlap_nb_list = []
@@ -74,7 +67,7 @@ def overlap_with_nodes_neighbors(df_hyper_matrix, N, overlap_df):
     return id_total_list, val_total_list, val_total_number_list, id_nb_list, val_nb_list, val_nb_number_list, id_rd_list, val_rd_list, val_rd_number_list
 
 
-def draw_distribution(id_total_list, val_total_list, id_nb_list, val_nb_list, id_rd_list, val_rd_list, fileName, t, p, ylim_top):
+def draw_distribution(id_total_list, val_total_list, id_nb_list, val_nb_list, id_rd_list, val_rd_list, fileName, ylim_top):
     markersize = 2000
     border_size = 3
     linewidth = 2
@@ -105,47 +98,27 @@ def draw_distribution(id_total_list, val_total_list, id_nb_list, val_nb_list, id
 
     plt.savefig('./overlap/' + fileName + '.png')
 
-def KL_divergence(p,q):
-    return scipy.stats.entropy(p, q)
-
 
 if __name__ == '__main__':
     hs = Hyperspreading()
-    # 构造超图矩阵
 
     tf = Transform()
-    # file_name_list = [
-    #      'chuancai', 'yuecai']
+
     file_name_list = ['Restaurants-Rev', 'Music-Rev', 'Geometry', 'NDC-classes-unique-hyperedges', 'Algebra', 'Bars-Rev'
         , 'iAF1260b', 'iJO1366']
     ylim_list = [0.2, 0.05, 0.05, 0.3, 0.25, 0.1, 0.3, 0.3]
 
-    # subplots_adjust(hspace=0.3, wspace=0.25)
     for index in range(len(file_name_list)):
         plt.figure(figsize=(28, 20))
         ylim_top = ylim_list[index]
         fileName = file_name_list[index]
-        # fileName = 'Algebra'
         df_hyper_matrix, N = tf.changeEdgeToMatrix('../datasets/' + fileName + '.txt')
 
         node_influence_dict = each_node_influence(N)
         overlap_df = each_pair_nodes_influence_overlap(N, node_influence_dict)
         id_total_list, val_total_list, val_total_number_list, id_nb_list, val_nb_list, val_nb_number_list, id_rd_list, val_rd_list, val_rd_number_list = overlap_with_nodes_neighbors(df_hyper_matrix, N, overlap_df)
-        t, p = stats.ttest_ind(val_total_number_list, val_nb_number_list)
-        t = Decimal(t).quantize(Decimal("0.00"))
-        p = Decimal(p).quantize(Decimal("0.00"))
-        print('=================================================')
-        print('====================' + fileName + '====================')
-        print('=================================================')
-        print('t-value:', t)
-        print('p-value:', p)
-        print()
-        # overlap_nb_list, overlap_total_list, overlap_random = overlap_with_nodes_neighbors(df_hyper_matrix, N, overlap_df)
-        # print(overlap_nb_list)
-        # print(overlap_total_list)
-        # draw_distribution(overlap_nb_list, overlap_total_list, overlap_random)
-        ylim_top = ylim_list[index]
-        draw_distribution(id_total_list, val_total_list, id_nb_list, val_nb_list, id_rd_list, val_rd_list, fileName, t, p, ylim_top)
+
+        draw_distribution(id_total_list, val_total_list, id_nb_list, val_nb_list, id_rd_list, val_rd_list, fileName, ylim_top)
         plt.show()
 
 

@@ -13,12 +13,7 @@ plt.switch_backend('agg')
 
 
 def getSeeds_sta(degree, i):
-    """
-    依次取度/超度最大的节点
-    :param degree: 超点的度（超点隶属超边数）
-    :param i: 选前 i个节点
-    :return: 前 i个超度最大的节点
-    """
+
     matrix = []
     matrix.append(np.arange(len(degree)))
     matrix.append(degree)
@@ -43,13 +38,8 @@ def getSeeds_sta(degree, i):
 
 def degreemax(df_hyper_matrix, K, R):
     """
-    Degree 算法 ： 取度（超点隶属超边数）最大的 k个节点作为种子节点集
-    :param df_hyper_matrix: 超图关联矩阵
-    :param K: 种子节点集个数
-    :param R: 迭代次数
-    :return: 种子集大小 - 影响规模 两者关系的列表（取平均）
+    Degree algorithm
     """
-    # Degree：度贪婪 依次选择度最大的节点
     degree = getTotalAdj(df_hyper_matrix, N)
     inf_spread_matrix = []
     for r in tqdm(range(R), desc="Loading..."):
@@ -65,13 +55,8 @@ def degreemax(df_hyper_matrix, K, R):
 
 def HDegree(df_hyper_matrix, K, R):
     """
-    HDegree 算法 ： 取超度（超点隶属超边数）最大的 k个节点作为种子节点集
-    :param df_hyper_matrix: 超图关联矩阵
-    :param K: 种子节点集个数
-    :param R: 迭代次数
-    :return: 种子集大小 - 影响规模 两者关系的列表（取平均）
+    HDegree algorithm
     """
-    # StaticGreedy：度贪婪 依次选择度最大的节点
     degree = df_hyper_matrix.sum(axis=1)
     inf_spread_matrix = []
     for r in tqdm(range(R), desc="Loading..."):
@@ -86,11 +71,7 @@ def HDegree(df_hyper_matrix, K, R):
 
 
 def getDegreeList(degree):
-    """
-    根据节点1-n的度情况获取节点名称和节点度的矩阵（按节点度降序排列）
-    :param degree: 节点1-n的度
-    :return: 节点度的矩阵（按节点度降序排列）
-    """
+
     matrix = []
     matrix.append(np.arange(len(degree)))
     matrix.append(degree)
@@ -100,14 +81,8 @@ def getDegreeList(degree):
 
 
 def getMaxDegreeNode(degree, seeds):
-    """
-    每次选取度（广义上的度，可以是权）最大的节点
-    :param degree: 度列表
-    :param seeds: 已加入种子节点集的节点
-    :return: 本次所选的节点（list类型）
-    """
+
     degree_copy = copy.deepcopy(degree)
-    # 每次找到degree最大且不在seeds内的节点
     global chosedNode
     while 1:
         flag = 0
@@ -124,16 +99,8 @@ def getMaxDegreeNode(degree, seeds):
 
 
 def updateDeg_hur(degree, chosenNode, df_hyper_matrix, seeds):
-    """
-    HuresticDegreeDiscount 算法的更新度操作
-    :param degree: 度列表
-    :param chosenNode: 选入种子节点集的节点
-    :param df_hyper_matrix: 关联矩阵
-    :return: void
-    """
-    # 找到该节点隶属的超边集
+
     edge_set = np.where(df_hyper_matrix.loc[chosenNode] == 1)[0]
-    # 对于每一条超边
     adj_set = []
     for edge in edge_set:
         adj_set.extend(list(np.where(df_hyper_matrix[edge] == 1)[0]))
@@ -153,16 +120,9 @@ def updateDeg_hur(degree, chosenNode, df_hyper_matrix, seeds):
 
 
 def updateDeg_hsd(degree, chosenNode, df_hyper_matrix):
-    """
-    HuresticSingleDiscount 算法的更新度操作
-    :param degree: 度列表
-    :param chosenNode: 选入种子节点集的节点
-    :param df_hyper_matrix: 关联矩阵
-    :return: void
-    """
-    # 找到该节点隶属的超边集
+
     edge_set = np.where(df_hyper_matrix.loc[chosenNode] == 1)[0]
-    # 对于每一条超边
+
     for edge in edge_set:
         node_set = np.where(df_hyper_matrix[edge] == 1)[0]
         for node in node_set:
@@ -170,13 +130,7 @@ def updateDeg_hsd(degree, chosenNode, df_hyper_matrix):
 
 
 def getDegreeWeighted(df_hyper_matrix, N):
-    """
-    找到找点邻居的关联矩阵 Aij
-    Aij : 表示节点 i和节点 j是否相连
-    :param df_hyper_matrix: 超图关联矩阵
-    :param N: 超图节点总数
-    :return: 节点的超度（即节点的邻居节点数）
-    """
+
     adj_matrix = np.dot(df_hyper_matrix, df_hyper_matrix.T)
     adj_matrix[np.eye(N, dtype=np.bool_)] = 0
     df_adj_matrix = pd.DataFrame(adj_matrix)
@@ -197,15 +151,9 @@ def getTotalAdj(df_hyper_matrix, N):
 
 
 def getSeeds_hdd(N, K):
-    """
-    得到 HuresticDegreeDiscount 的种子节点集
-    :param N: 节点总数
-    :param K: 种子节点个数
-    :return: 所选的种子节点集
-    """
+
     seeds = []
     degree = getTotalAdj(df_hyper_matrix, N)
-    # 找到i个种子节点的节点集
     for j in range(1, K+1):
         chosenNode = getMaxDegreeNode(degree, seeds)[0]
         seeds.append(chosenNode)
@@ -214,15 +162,9 @@ def getSeeds_hdd(N, K):
 
 
 def getSeeds_hsd(N, K):
-    """
-    得到 HuresticSingleDiscount 的种子节点集
-    :param N: 节点总数
-    :param K: 种子节点个数
-    :return: 所选的种子节点集
-    """
+
     seeds = []
     degree = getTotalAdj(df_hyper_matrix, N)
-    # 找到i个种子节点的节点集
     for j in range(1, K+1):
         chosenNode = getMaxDegreeNode(degree, seeds)[0]
         seeds.append(chosenNode)
@@ -232,12 +174,7 @@ def getSeeds_hsd(N, K):
 
 def hurDisc(df_hyper_matrix, K, R, N):
     """
-    HuresticDegreeDiscount 算法
-    :param df_hyper_matrix: 超图关联矩阵
-    :param K: 种子节点集个数
-    :param R: 迭代次数
-    :param N: 超图中节点总数
-    :return: 种子集大小 - 影响规模 两者关系的列表（取平均）
+    HuresticDegreeDiscount algorithm
     """
     inf_spread_matrix = []
     seeds_list = getSeeds_hdd(N, K)
@@ -254,12 +191,7 @@ def hurDisc(df_hyper_matrix, K, R, N):
 
 def sglDisc(df_hyper_matrix, K, R, N):
     """
-    HuresticSingleDiscount 算法
-    :param df_hyper_matrix: 超图关联矩阵
-    :param K: 种子节点集个数
-    :param R: 迭代次数
-    :param N: 超图中节点总数
-    :return: 种子集大小 - 影响规模 两者关系的列表（取平均）
+    HuresticSingleDiscount algorithm
     """
     inf_spread_matrix = []
     seeds_list = getSeeds_hsd(N, K)
@@ -277,11 +209,7 @@ def sglDisc(df_hyper_matrix, K, R, N):
 
 def generalGreedy(df_hyper_matrix, K, R):
     """
-    GeneralGreedy 算法
-    :param df_hyper_matrix: 超图关联矩阵
-    :param K: 种子节点集个数
-    :param R: 迭代次数
-    :return: 种子集大小 - 影响规模 两者关系的列表（取平均）
+    GeneralGreedy algorithm
     """
     degree = df_hyper_matrix.sum(axis=1)
     inf_spread_matrix = []
@@ -309,9 +237,9 @@ def generalGreedy(df_hyper_matrix, K, R):
 
 
 def computeCI(l, N, df_hyper_matrix):
+
     CI_list = []
     degree = df_hyper_matrix.sum(axis=1)
-    # degree = getTotalAdj(df_hyper_matrix, N)
     M = len(df_hyper_matrix.columns.values)
     for i in range(0, N):
         # 找到它的l阶邻居
@@ -372,12 +300,7 @@ def getSeeds_ci(l, N, K, df_hyper_matrix):
 
 def CIAgr(df_hyper_matrix, K, R, N, l):
     """
-    CI 算法
-    :param df_hyper_matrix: 超图关联矩阵
-    :param K: 种子节点个数
-    :param R: 迭代次数
-    :param N: 超图节点总数
-    :return: 种子集大小 - 影响规模 两者关系的列表（取平均）
+    H-CI algorithm
     """
     inf_spread_matrix = []
     seeds_list = getSeeds_ci(l, N, K, df_hyper_matrix)
@@ -438,6 +361,9 @@ def getSeeds_ris(N, K, lamda, theta, df_hyper_matrix):
 
 
 def RISAgr(df_hyper_matrix, K, R, N, lamda, theta):
+    """
+    H-RIS algorithm
+    """
     inf_spread_matrix = []
     seeds_list = getSeeds_ris(N, K, lamda, theta, df_hyper_matrix)
     for r in tqdm(range(R), desc="Loading..."):

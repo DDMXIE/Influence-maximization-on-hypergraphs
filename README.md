@@ -6,7 +6,7 @@ An adaptive degree-based algorithm, named HDD, which could effectively avoid nod
 
 For more details, please refer the following paper:
 > Ming Xie, Xiu-Xiu Zhan, Chuang Liu, Zi-Ke Zhang: Influence maxmization in hypergraphs.
-arXiv: 2206.01394
+> arXiv: 2206.01394
 
 
 ## About File
